@@ -106,3 +106,65 @@ func UpdateSubnetStatusFromAzure(v *v1alpha3.Subnet, az networkmgmt.Subnet) {
 	v.Status.ID = azure.ToString(az.ID)
 	v.Status.Purpose = azure.ToString(az.Purpose)
 }
+
+// NewprivateLinkServiceConnections converts to Azure ServiceEndpointPropertiesFormat
+func NewprivateLinkServiceConnections(p []v1alpha3.PrivateLinkServiceConnection) *[]networkmgmt.PrivateLinkServiceConnection {
+	connections := make([]networkmgmt.PrivateLinkServiceConnection, len(p))
+
+	for i, conn := range p {
+		connections[i] = networkmgmt.PrivateLinkServiceConnection{
+			Name: azure.ToStringPtr(conn.Name),
+			PrivateLinkServiceConnectionProperties: &networkmgmt.PrivateLinkServiceConnectionProperties{
+				PrivateLinkServiceID: azure.ToStringPtr(conn.PrivateConnectionResourceID),
+			},
+		}
+	}
+
+	return &connections
+}
+
+// NewPrivateEndpointParameters returns an Azure VirtualNetwork object from a virtual network spec
+func NewPrivateEndpointParameters(v *v1alpha3.PrivateEndpoint) networkmgmt.PrivateEndpoint {
+	return networkmgmt.PrivateEndpoint{
+		Location: azure.ToStringPtr(v.Spec.Location),
+		Tags:     azure.ToStringPtrMap(v.Spec.Tags),
+		PrivateEndpointProperties: &networkmgmt.PrivateEndpointProperties{
+			Subnet:                              &networkmgmt.Subnet{ID: azure.ToStringPtr(v.Spec.VirtualNetworkSubnetID)},
+			PrivateLinkServiceConnections:       NewprivateLinkServiceConnections(v.Spec.PrivateLinkServiceConnections),
+			ManualPrivateLinkServiceConnections: NewprivateLinkServiceConnections(v.Spec.ManualPrivateLinkServiceConnections),
+		},
+	}
+}
+
+// PrivateEndpointNeedsUpdate determines if a virtual network need to be updated
+func PrivateEndpointNeedsUpdate(kube *v1alpha3.PrivateEndpoint, az networkmgmt.PrivateEndpoint) bool {
+	up := NewPrivateEndpointParameters(kube)
+
+	switch {
+	case !reflect.DeepEqual(up.PrivateEndpointProperties.Subnet, az.PrivateEndpointProperties.Subnet):
+		return true
+	case !reflect.DeepEqual(up.PrivateEndpointProperties.ManualPrivateLinkServiceConnections, az.PrivateEndpointProperties.ManualPrivateLinkServiceConnections):
+		return true
+	case !reflect.DeepEqual(up.PrivateEndpointProperties.PrivateLinkServiceConnections, az.PrivateEndpointProperties.PrivateLinkServiceConnections):
+		return true
+	case !reflect.DeepEqual(up.Tags, az.Tags):
+		return true
+	}
+
+	return false
+}
+
+// UpdatePrivateEndpointStatusFromAzure updates the status related to the external
+// Azure virtual network in the VirtualNetworkStatus
+func UpdatePrivateEndpointStatusFromAzure(v *v1alpha3.PrivateEndpoint, az networkmgmt.PrivateEndpoint) {
+	networkInterfaces := make([]string, len(*az.NetworkInterfaces))
+	for i, n := range *az.NetworkInterfaces {
+		networkInterfaces[i] = azure.ToString(n.ID)
+	}
+
+	v.Status.State = string(az.ProvisioningState)
+	v.Status.ID = azure.ToString(az.ID)
+	v.Status.Etag = azure.ToString(az.Etag)
+	v.Status.Type = azure.ToString(az.Type)
+	v.Status.NetworkInterfacesID = networkInterfaces
+}

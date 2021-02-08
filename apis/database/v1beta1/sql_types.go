@@ -161,7 +161,9 @@ type SQLServerParameters struct {
 
 	// TODO(hasheddan): support InfrastructureEncryption
 
-	// TODO(hasheddan): support PublicNetworkAccess
+	// PublicNetworkAccess - control public network access
+	// +optional
+	PublicNetworkAccess PublicNetworkAccessEnum `json:"publicNetworkAccess,omitempty"`
 
 	// TODO(hasheddan): support CreateMode
 
@@ -191,6 +193,17 @@ const (
 	TLS11                  MinimalTLSVersionEnum = "TLS1_1"
 	TLS12                  MinimalTLSVersionEnum = "TLS1_2"
 	TLSEnforcementDisabled MinimalTLSVersionEnum = "TLSEnforcementDisabled"
+)
+
+// PublicNetworkAccessEnum describes the public network access.
+// Keep synced with "github.com/Azure/azure-sdk-for-go/services/mysql/mgmt/2017-12-01/mysql".PublicNetworkAccessEnum
+// +kubebuilder:validation:Enum=Enabled;Disabled
+type PublicNetworkAccessEnum string
+
+// All the legitimate PublicNetworkAccess values
+const (
+	EnablePublicAccess  PublicNetworkAccessEnum = "Enabled"
+	DisablePublicAccess PublicNetworkAccessEnum = "Disabled"
 )
 
 // A SQLServerSpec defines the desired state of a SQLServer.

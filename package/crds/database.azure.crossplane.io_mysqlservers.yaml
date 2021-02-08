@@ -70,6 +70,12 @@ spec:
                     - TLS1_2
                     - TLSEnforcementDisabled
                     type: string
+                  publicNetworkAccess:
+                    description: PublicNetworkAccess - control public network access
+                    enum:
+                    - Enabled
+                    - Disabled
+                    type: string
                   resourceGroupName:
                     description: ResourceGroupName specifies the name of the resource group that should contain this SQLServer.
                     type: string

@@ -95,3 +95,38 @@ func (mg *Subnet) ResolveReferences(ctx context.Context, c client.Reader) error 
 
 	return nil
 }
+
+// ResolveReferences of this PrivateEndpoints
+func (mg *PrivateEndpoint) ResolveReferences(ctx context.Context, c client.Reader) error {
+	r := reference.NewAPIResolver(c, mg)
+
+	// Resolve spec.resourceGroupName
+	rsp, err := r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: mg.Spec.ResourceGroupName,
+		Reference:    mg.Spec.ResourceGroupNameRef,
+		Selector:     mg.Spec.ResourceGroupNameSelector,
+		To:           reference.To{Managed: &v1alpha3.ResourceGroup{}, List: &v1alpha3.ResourceGroupList{}},
+		Extract:      reference.ExternalName(),
+	})
+	if err != nil {
+		return errors.Wrap(err, "spec.resourceGroupName")
+	}
+	mg.Spec.ResourceGroupName = rsp.ResolvedValue
+	mg.Spec.ResourceGroupNameRef = rsp.ResolvedReference
+
+	// Resolve spec.virtualNetworkSubnetId
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: mg.Spec.VirtualNetworkSubnetID,
+		Reference:    mg.Spec.VirtualNetworkSubnetIDRef,
+		Selector:     mg.Spec.VirtualNetworkSubnetIDSelector,
+		To:           reference.To{Managed: &Subnet{}, List: &SubnetList{}},
+		Extract:      SubnetID(),
+	})
+	if err != nil {
+		return errors.Wrap(err, "spec.virtualNetworkSubnetId")
+	}
+	mg.Spec.VirtualNetworkSubnetID = rsp.ResolvedValue
+	mg.Spec.VirtualNetworkSubnetIDRef = rsp.ResolvedReference
+
+	return nil
+}

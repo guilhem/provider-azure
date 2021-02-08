@@ -53,7 +53,16 @@ var (
 	SubnetGroupVersionKind = SchemeGroupVersion.WithKind(SubnetKind)
 )
 
+// Subnet type metadata.
+var (
+	PrivateEndpointKind             = reflect.TypeOf(PrivateEndpoint{}).Name()
+	PrivateEndpointGroupKind        = schema.GroupKind{Group: Group, Kind: PrivateEndpointKind}.String()
+	PrivateEndpointKindAPIVersion   = PrivateEndpointKind + "." + SchemeGroupVersion.String()
+	PrivateEndpointGroupVersionKind = SchemeGroupVersion.WithKind(PrivateEndpointKind)
+)
+
 func init() {
 	SchemeBuilder.Register(&VirtualNetwork{}, &VirtualNetworkList{})
 	SchemeBuilder.Register(&Subnet{}, &SubnetList{})
+	SchemeBuilder.Register(&PrivateEndpoint{}, &PrivateEndpointList{})
 }

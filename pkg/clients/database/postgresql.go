@@ -90,6 +90,7 @@ func (c *PostgreSQLServerClient) CreateServer(ctx context.Context, cr *azuredbv1
 			StorageMB:           azure.ToInt32Ptr(s.StorageProfile.StorageMB),
 			StorageAutogrow:     postgresql.StorageAutogrow(azure.ToString(s.StorageProfile.StorageAutogrow)),
 		},
+		PublicNetworkAccess: postgresql.PublicNetworkAccessEnum(s.PublicNetworkAccess),
 	}
 	sku, err := ToPostgreSQLSKU(s.SKU)
 	if err != nil {

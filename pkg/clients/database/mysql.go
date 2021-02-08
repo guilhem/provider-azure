@@ -98,6 +98,7 @@ func (c *MySQLServerClient) CreateServer(ctx context.Context, cr *azuredbv1beta1
 			StorageMB:           azure.ToInt32Ptr(s.StorageProfile.StorageMB),
 			StorageAutogrow:     mysql.StorageAutogrow(azure.ToString(s.StorageProfile.StorageAutogrow)),
 		},
+		PublicNetworkAccess: mysql.PublicNetworkAccessEnum(s.PublicNetworkAccess),
 	}
 	sku, err := ToMySQLSKU(s.SKU)
 	if err != nil {
