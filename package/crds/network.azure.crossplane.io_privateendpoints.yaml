@@ -34,7 +34,7 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
-    name: v1alpha3
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: A PrivateEndpoint is a managed resource that represents an Azure Virtual Network.
@@ -59,56 +59,48 @@ spec:
               location:
                 description: Location - Resource location.
                 type: string
-              properties:
-                description: VirtualNetworkPropertiesFormat - Properties of the virtual network.
-                properties:
-                  manualPrivateLinkServiceConnections:
-                    items:
-                      description: PrivateLinkServiceConnection ldlldelde
-                      properties:
-                        name:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          type: string
-                        privateConnectionResourceID:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          type: string
-                        subresourceID:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          items:
-                            type: string
-                          type: array
-                      required:
-                      - name
-                      - privateConnectionResourceID
-                      type: object
-                    type: array
-                  privateLinkServiceConnections:
-                    items:
-                      description: PrivateLinkServiceConnection ldlldelde
-                      properties:
-                        name:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          type: string
-                        privateConnectionResourceID:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          type: string
-                        subresourceID:
-                          description: AddressSpace - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
-                          items:
-                            type: string
-                          type: array
-                      required:
-                      - name
-                      - privateConnectionResourceID
-                      type: object
-                    type: array
-                  subnet:
-                    type: string
-                required:
-                - manualPrivateLinkServiceConnections
-                - privateLinkServiceConnections
-                - subnet
-                type: object
+              manualPrivateLinkServiceConnections:
+                description: ManualPrivateLinkServiceConnections
+                items:
+                  description: PrivateLinkServiceConnection ldlldelde
+                  properties:
+                    name:
+                      description: Name - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      type: string
+                    privateConnectionResourceID:
+                      description: PrivateConnectionResourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      type: string
+                    subresourceID:
+                      description: SubresourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - name
+                  - privateConnectionResourceID
+                  type: object
+                type: array
+              privateLinkServiceConnections:
+                description: PrivateLinkServiceConnections
+                items:
+                  description: PrivateLinkServiceConnection ldlldelde
+                  properties:
+                    name:
+                      description: Name - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      type: string
+                    privateConnectionResourceID:
+                      description: PrivateConnectionResourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      type: string
+                    subresourceID:
+                      description: SubresourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - name
+                  - privateConnectionResourceID
+                  type: object
+                type: array
               providerConfigRef:
                 description: ProviderConfigReference specifies how the provider that will be used to create, observe, update, and delete this managed resource should be configured.
                 properties:
@@ -156,6 +148,30 @@ spec:
                   type: string
                 description: Tags - Resource tags.
                 type: object
+              virtualNetworkSubnetId:
+                description: VirtualNetworkSubnetID - The ARM resource id of the virtual network subnet.
+                type: string
+              virtualNetworkSubnetIdRef:
+                description: VirtualNetworkSubnetIDRef - A reference to a Subnet to retrieve its ID
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              virtualNetworkSubnetIdSelector:
+                description: VirtualNetworkSubnetIDRef - A selector for a Subnet to retrieve its ID
+                properties:
+                  matchControllerRef:
+                    description: MatchControllerRef ensures an object with the same controller reference as the selecting object is selected.
+                    type: boolean
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: MatchLabels ensures an object with matching labels is selected.
+                    type: object
+                type: object
               writeConnectionSecretToRef:
                 description: WriteConnectionSecretToReference specifies the namespace and name of a Secret to which any connection details for this managed resource should be written. Connection details frequently include the endpoint, username, and password required to connect to the managed resource.
                 properties:
@@ -171,7 +187,8 @@ spec:
                 type: object
             required:
             - location
-            - properties
+            - manualPrivateLinkServiceConnections
+            - privateLinkServiceConnections
             type: object
           status:
             description: A PrivateEndpointStatus represents the observed state of a VirtualNetwork.
@@ -208,10 +225,10 @@ spec:
                 description: Etag - A unique read-only string that changes whenever the resource is updated.
                 type: string
               id:
-                description: ID of this VirtualNetwork.
+                description: ID of this PrivateEndpoint.
                 type: string
               message:
-                description: A Message providing detail about the state of this VirtualNetwork, if any.
+                description: A Message providing detail about the state of this PrivateEndpoint, if any.
                 type: string
               networkInterfaces:
                 description: NetworkInterfacesID
@@ -219,10 +236,10 @@ spec:
                   type: string
                 type: array
               state:
-                description: State of this VirtualNetwork.
+                description: State of this PrivateEndpoint.
                 type: string
               type:
-                description: Type of this VirtualNetwork.
+                description: Type of this PrivateEndpoint.
                 type: string
             type: object
         required:

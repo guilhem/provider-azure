@@ -22,6 +22,7 @@ import (
 	networkmgmt "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-06-01/network"
 
 	"github.com/crossplane/provider-azure/apis/network/v1alpha3"
+	"github.com/crossplane/provider-azure/apis/network/v1beta1"
 	azure "github.com/crossplane/provider-azure/pkg/clients"
 )
 
@@ -108,7 +109,7 @@ func UpdateSubnetStatusFromAzure(v *v1alpha3.Subnet, az networkmgmt.Subnet) {
 }
 
 // NewprivateLinkServiceConnections converts to Azure ServiceEndpointPropertiesFormat
-func NewprivateLinkServiceConnections(p []v1alpha3.PrivateLinkServiceConnection) *[]networkmgmt.PrivateLinkServiceConnection {
+func NewprivateLinkServiceConnections(p []v1beta1.PrivateLinkServiceConnection) *[]networkmgmt.PrivateLinkServiceConnection {
 	connections := make([]networkmgmt.PrivateLinkServiceConnection, len(p))
 
 	for i, conn := range p {
@@ -124,7 +125,7 @@ func NewprivateLinkServiceConnections(p []v1alpha3.PrivateLinkServiceConnection)
 }
 
 // NewPrivateEndpointParameters returns an Azure VirtualNetwork object from a virtual network spec
-func NewPrivateEndpointParameters(v *v1alpha3.PrivateEndpoint) networkmgmt.PrivateEndpoint {
+func NewPrivateEndpointParameters(v *v1beta1.PrivateEndpoint) networkmgmt.PrivateEndpoint {
 	return networkmgmt.PrivateEndpoint{
 		Location: azure.ToStringPtr(v.Spec.Location),
 		Tags:     azure.ToStringPtrMap(v.Spec.Tags),
@@ -137,7 +138,7 @@ func NewPrivateEndpointParameters(v *v1alpha3.PrivateEndpoint) networkmgmt.Priva
 }
 
 // PrivateEndpointNeedsUpdate determines if a virtual network need to be updated
-func PrivateEndpointNeedsUpdate(kube *v1alpha3.PrivateEndpoint, az networkmgmt.PrivateEndpoint) bool {
+func PrivateEndpointNeedsUpdate(kube *v1beta1.PrivateEndpoint, az networkmgmt.PrivateEndpoint) bool {
 	up := NewPrivateEndpointParameters(kube)
 
 	switch {
@@ -156,7 +157,7 @@ func PrivateEndpointNeedsUpdate(kube *v1alpha3.PrivateEndpoint, az networkmgmt.P
 
 // UpdatePrivateEndpointStatusFromAzure updates the status related to the external
 // Azure virtual network in the VirtualNetworkStatus
-func UpdatePrivateEndpointStatusFromAzure(v *v1alpha3.PrivateEndpoint, az networkmgmt.PrivateEndpoint) {
+func UpdatePrivateEndpointStatusFromAzure(v *v1beta1.PrivateEndpoint, az networkmgmt.PrivateEndpoint) {
 	networkInterfaces := make([]string, len(*az.NetworkInterfaces))
 	for i, n := range *az.NetworkInterfaces {
 		networkInterfaces[i] = azure.ToString(n.ID)

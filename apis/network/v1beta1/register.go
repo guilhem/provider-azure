@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha3
+package v1beta1
 
 import (
 	"reflect"
@@ -26,7 +26,7 @@ import (
 // Package type metadata.
 const (
 	Group   = "network.azure.crossplane.io"
-	Version = "v1alpha3"
+	Version = "v1beta1"
 )
 
 var (
@@ -37,23 +37,14 @@ var (
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
 
-// VirtualNetwork type metadata.
+// PrivateEndpoint type metadata.
 var (
-	VirtualNetworkKind             = reflect.TypeOf(VirtualNetwork{}).Name()
-	VirtualNetworkGroupKind        = schema.GroupKind{Group: Group, Kind: VirtualNetworkKind}.String()
-	VirtualNetworkKindAPIVersion   = VirtualNetworkKind + "." + SchemeGroupVersion.String()
-	VirtualNetworkGroupVersionKind = SchemeGroupVersion.WithKind(VirtualNetworkKind)
-)
-
-// Subnet type metadata.
-var (
-	SubnetKind             = reflect.TypeOf(Subnet{}).Name()
-	SubnetGroupKind        = schema.GroupKind{Group: Group, Kind: SubnetKind}.String()
-	SubnetKindAPIVersion   = SubnetKind + "." + SchemeGroupVersion.String()
-	SubnetGroupVersionKind = SchemeGroupVersion.WithKind(SubnetKind)
+	PrivateEndpointKind             = reflect.TypeOf(PrivateEndpoint{}).Name()
+	PrivateEndpointGroupKind        = schema.GroupKind{Group: Group, Kind: PrivateEndpointKind}.String()
+	PrivateEndpointKindAPIVersion   = PrivateEndpointKind + "." + SchemeGroupVersion.String()
+	PrivateEndpointGroupVersionKind = SchemeGroupVersion.WithKind(PrivateEndpointKind)
 )
 
 func init() {
-	SchemeBuilder.Register(&VirtualNetwork{}, &VirtualNetworkList{})
-	SchemeBuilder.Register(&Subnet{}, &SubnetList{})
+	SchemeBuilder.Register(&PrivateEndpoint{}, &PrivateEndpointList{})
 }

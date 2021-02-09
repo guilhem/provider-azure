@@ -32,7 +32,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-azure/apis/network/v1alpha3"
+	"github.com/crossplane/provider-azure/apis/network/v1beta1"
 	azureclients "github.com/crossplane/provider-azure/pkg/clients"
 	"github.com/crossplane/provider-azure/pkg/clients/network"
 )
@@ -48,13 +48,13 @@ const (
 
 // Setup adds a controller that reconciles Subnets.
 func Setup(mgr ctrl.Manager, l logging.Logger) error {
-	name := managed.ControllerName(v1alpha3.PrivateEndpointKind)
+	name := managed.ControllerName(v1beta1.PrivateEndpointKind)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
-		For(&v1alpha3.PrivateEndpoint{}).
+		For(&v1beta1.PrivateEndpoint{}).
 		Complete(managed.NewReconciler(mgr,
-			resource.ManagedKind(v1alpha3.PrivateEndpointGroupVersionKind),
+			resource.ManagedKind(v1beta1.PrivateEndpointGroupVersionKind),
 			managed.WithConnectionPublishers(),
 			managed.WithExternalConnecter(&connecter{client: mgr.GetClient()}),
 			managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
@@ -81,12 +81,12 @@ type external struct {
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
-	s, ok := mg.(*v1alpha3.PrivateEndpoint)
+	pe, ok := mg.(*v1beta1.PrivateEndpoint)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotSubnet)
 	}
 
-	az, err := e.client.Get(ctx, s.Spec.ResourceGroupName, s.Spec.Name, "")
+	az, err := e.client.Get(ctx, pe.Spec.ResourceGroupName, meta.GetExternalName(pe), "")
 	if azureclients.IsNotFound(err) {
 		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
@@ -94,8 +94,8 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{}, errors.Wrap(err, errGetSubnet)
 	}
 
-	network.UpdateSubnetStatusFromAzure(s, az)
-	s.SetConditions(xpv1.Available())
+	network.UpdatePrivateEndpointStatusFromAzure(pe, az)
+	pe.SetConditions(xpv1.Available())
 
 	o := managed.ExternalObservation{
 		ResourceExists:    true,
@@ -106,15 +106,15 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
-	s, ok := mg.(*v1alpha3.Subnet)
+	pe, ok := mg.(*v1beta1.PrivateEndpoint)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotSubnet)
 	}
 
-	s.Status.SetConditions(xpv1.Creating())
+	pe.Status.SetConditions(xpv1.Creating())
 
-	snet := network.NewSubnetParameters(s)
-	if _, err := e.client.CreateOrUpdate(ctx, s.Spec.ResourceGroupName, s.Spec.VirtualNetworkName, meta.GetExternalName(s), snet); err != nil {
+	endpoint := network.NewPrivateEndpointParameters(pe)
+	if _, err := e.client.CreateOrUpdate(ctx, pe.Spec.ResourceGroupName, meta.GetExternalName(pe), endpoint); err != nil {
 		return managed.ExternalCreation{}, errors.Wrap(err, errCreateSubnet)
 	}
 
@@ -122,19 +122,19 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	s, ok := mg.(*v1alpha3.Subnet)
+	pe, ok := mg.(*v1beta1.PrivateEndpoint)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotSubnet)
 	}
 
-	az, err := e.client.Get(ctx, s.Spec.ResourceGroupName, s.Spec.VirtualNetworkName, meta.GetExternalName(s), "")
+	az, err := e.client.Get(ctx, pe.Spec.ResourceGroupName, meta.GetExternalName(pe), "")
 	if err != nil {
 		return managed.ExternalUpdate{}, errors.Wrap(err, errGetSubnet)
 	}
 
-	if network.SubnetNeedsUpdate(s, az) {
-		snet := network.NewSubnetParameters(s)
-		if _, err := e.client.CreateOrUpdate(ctx, s.Spec.ResourceGroupName, s.Spec.VirtualNetworkName, meta.GetExternalName(s), snet); err != nil {
+	if network.PrivateEndpointNeedsUpdate(pe, az) {
+		snet := network.NewPrivateEndpointParameters(pe)
+		if _, err := e.client.CreateOrUpdate(ctx, pe.Spec.ResourceGroupName, meta.GetExternalName(pe), snet); err != nil {
 			return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateSubnet)
 		}
 	}
@@ -142,13 +142,13 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
-	s, ok := mg.(*v1alpha3.Subnet)
+	pe, ok := mg.(*v1beta1.PrivateEndpoint)
 	if !ok {
 		return errors.New(errNotSubnet)
 	}
 
 	mg.SetConditions(xpv1.Deleting())
 
-	_, err := e.client.Delete(ctx, s.Spec.ResourceGroupName, s.Spec.VirtualNetworkName, meta.GetExternalName(s))
+	_, err := e.client.Delete(ctx, pe.Spec.ResourceGroupName, meta.GetExternalName(pe))
 	return errors.Wrap(resource.Ignore(azureclients.IsNotFound, err), errDeleteSubnet)
 }
