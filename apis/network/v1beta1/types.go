@@ -22,7 +22,7 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
-// PrivateLinkServiceConnection ldlldelde
+// PrivateLinkServiceConnection - defines properties of a Private Link Service Connection
 type PrivateLinkServiceConnection struct {
 	// Name - The AddressSpace that contains an array of IP address
 	// ranges that can be used by subnets.
@@ -38,7 +38,7 @@ type PrivateLinkServiceConnection struct {
 	SubresourceID []string `json:"subresourceID,omitempty"`
 }
 
-// PrivateEndpointParameters defines properties of a VirtualNetwork.
+// PrivateEndpointParameters - defines properties of a PrivateEndpoint.
 type PrivateEndpointParameters struct {
 	// VirtualNetworkSubnetID - The ARM resource id of the virtual network
 	// subnet.
@@ -57,22 +57,21 @@ type PrivateEndpointParameters struct {
 	ManualPrivateLinkServiceConnections []PrivateLinkServiceConnection `json:"manualPrivateLinkServiceConnections"`
 }
 
-// A PrivateEndpointSpec defines the desired state of a VirtualNetwork.
+// A PrivateEndpointSpec - defines the desired state of a PrivateEndpoint.
 type PrivateEndpointSpec struct {
 	xpv1.ResourceSpec `json:",inline"`
 
-	// ResourceGroupName - Name of the Virtual Network's resource group.
+	// ResourceGroupName - Name of the PrivateEndpoint's resource group.
 	ResourceGroupName string `json:"resourceGroupName,omitempty"`
 
-	// ResourceGroupNameRef - A reference to the the Virtual Network's resource
+	// ResourceGroupNameRef - A reference to the the PrivateEndpoint's resource
 	// group.
 	ResourceGroupNameRef *xpv1.Reference `json:"resourceGroupNameRef,omitempty"`
 
-	// ResourceGroupNameSelector - Select a reference to the the Virtual
-	// Network's resource group.
+	// ResourceGroupNameSelector - Select a reference to the PrivateEndpoint's resource group.
 	ResourceGroupNameSelector *xpv1.Selector `json:"resourceGroupNameSelector,omitempty"`
 
-	// PrivateEndpointProperties - Properties of the virtual network.
+	// PrivateEndpointProperties - Properties of the PrivateEndpoint.
 	PrivateEndpointParameters `json:",inline"`
 
 	// Location - Resource location.
@@ -83,7 +82,7 @@ type PrivateEndpointSpec struct {
 	Tags map[string]string `json:"tags,omitempty"`
 }
 
-// A PrivateEndpointStatus represents the observed state of a VirtualNetwork.
+// A PrivateEndpointStatus represents the observed state of the PrivateEndpoint
 type PrivateEndpointStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
 
@@ -110,8 +109,7 @@ type PrivateEndpointStatus struct {
 
 // +kubebuilder:object:root=true
 
-// A PrivateEndpoint is a managed resource that represents an Azure Virtual
-// Network.
+// A PrivateEndpoint is a managed resource that represents an Azure Private Endpoint
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="STATE",type="string",JSONPath=".status.state"
@@ -129,7 +127,7 @@ type PrivateEndpoint struct {
 
 // +kubebuilder:object:root=true
 
-// PrivateEndpointList contains a list of VirtualNetwork items
+// PrivateEndpointList contains a list of PrivateEndpoint items
 type PrivateEndpointList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

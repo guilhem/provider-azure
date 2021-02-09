@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	networkmgmt "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-06-01/network"
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/crossplane/provider-azure/apis/network/v1alpha3"
 	"github.com/crossplane/provider-azure/apis/network/v1beta1"
@@ -108,7 +109,7 @@ func UpdateSubnetStatusFromAzure(v *v1alpha3.Subnet, az networkmgmt.Subnet) {
 	v.Status.Purpose = azure.ToString(az.Purpose)
 }
 
-// NewprivateLinkServiceConnections converts to Azure ServiceEndpointPropertiesFormat
+// NewprivateLinkServiceConnections converts to Azure PrivateLinkServiceConnection
 func NewprivateLinkServiceConnections(p []v1beta1.PrivateLinkServiceConnection) *[]networkmgmt.PrivateLinkServiceConnection {
 	connections := make([]networkmgmt.PrivateLinkServiceConnection, len(p))
 
@@ -124,7 +125,7 @@ func NewprivateLinkServiceConnections(p []v1beta1.PrivateLinkServiceConnection) 
 	return &connections
 }
 
-// NewPrivateEndpointParameters returns an Azure VirtualNetwork object from a virtual network spec
+// NewPrivateEndpointParameters returns an Azure Private Endpoint object from a private endpoint spec
 func NewPrivateEndpointParameters(v *v1beta1.PrivateEndpoint) networkmgmt.PrivateEndpoint {
 	return networkmgmt.PrivateEndpoint{
 		Location: azure.ToStringPtr(v.Spec.Location),
@@ -137,16 +138,16 @@ func NewPrivateEndpointParameters(v *v1beta1.PrivateEndpoint) networkmgmt.Privat
 	}
 }
 
-// PrivateEndpointNeedsUpdate determines if a virtual network need to be updated
+// PrivateEndpointNeedsUpdate determines if a private endpoint need to be updated
 func PrivateEndpointNeedsUpdate(kube *v1beta1.PrivateEndpoint, az networkmgmt.PrivateEndpoint) bool {
 	up := NewPrivateEndpointParameters(kube)
 
 	switch {
-	case !reflect.DeepEqual(up.PrivateEndpointProperties.Subnet, az.PrivateEndpointProperties.Subnet):
+	case !cmp.Equal(up.PrivateEndpointProperties.Subnet, az.PrivateEndpointProperties.Subnet):
 		return true
 	case !reflect.DeepEqual(up.PrivateEndpointProperties.ManualPrivateLinkServiceConnections, az.PrivateEndpointProperties.ManualPrivateLinkServiceConnections):
 		return true
-	case !reflect.DeepEqual(up.PrivateEndpointProperties.PrivateLinkServiceConnections, az.PrivateEndpointProperties.PrivateLinkServiceConnections):
+	case !cmp.Equal(up.PrivateEndpointProperties.PrivateLinkServiceConnections, az.PrivateEndpointProperties.PrivateLinkServiceConnections):
 		return true
 	case !reflect.DeepEqual(up.Tags, az.Tags):
 		return true
@@ -156,7 +157,7 @@ func PrivateEndpointNeedsUpdate(kube *v1beta1.PrivateEndpoint, az networkmgmt.Pr
 }
 
 // UpdatePrivateEndpointStatusFromAzure updates the status related to the external
-// Azure virtual network in the VirtualNetworkStatus
+// Azure private endpoint in the PrivateEndpointStatus
 func UpdatePrivateEndpointStatusFromAzure(v *v1beta1.PrivateEndpoint, az networkmgmt.PrivateEndpoint) {
 	networkInterfaces := make([]string, len(*az.NetworkInterfaces))
 	for i, n := range *az.NetworkInterfaces {

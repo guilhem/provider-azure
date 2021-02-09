@@ -27,7 +27,7 @@ import (
 	"github.com/crossplane/provider-azure/apis/v1alpha3"
 )
 
-// ResolveReferences llkfe
+// ResolveReferences of PrivateEndpoint
 func (mg *PrivateEndpoint) ResolveReferences(ctx context.Context, c client.Reader) error {
 	r := reference.NewAPIResolver(c, mg)
 

@@ -17,17 +17,18 @@ limitations under the License.
 package network
 
 import (
+	"reflect"
 	"testing"
 
 	networkmgmt "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-06-01/network"
 	"github.com/Azure/go-autorest/autorest/to"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-
 	"github.com/crossplane/provider-azure/apis/network/v1alpha3"
+	"github.com/crossplane/provider-azure/apis/network/v1beta1"
 	azure "github.com/crossplane/provider-azure/pkg/clients"
 )
 
@@ -40,6 +41,7 @@ var (
 	addressPrefix        = "10.0.0.0/16"
 	serviceEndpoint      = "Microsoft.Sql"
 	tags                 = map[string]string{"one": "test", "two": "test"}
+	privateLinkConn      = v1beta1.PrivateLinkServiceConnection{Name: "myPrivateLink", PrivateConnectionResourceID: "coolid", SubresourceID: []string{"sub"}}
 
 	id           = "a-very-cool-id"
 	etag         = "a-very-cool-etag"
@@ -537,6 +539,221 @@ func TestUpdateSubnetStatusFromAzure(t *testing.T) {
 			// make sure that other resource parameters are updated
 			tc.want.ResourceStatus = resourceStatus
 			if diff := cmp.Diff(tc.want, v.Status); diff != "" {
+				t.Errorf("UpdateSubnetStatusFromAzure(...): -want, +got\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestNewprivateLinkServiceConnections(t *testing.T) {
+	type args struct {
+		p []v1beta1.PrivateLinkServiceConnection
+	}
+	tests := []struct {
+		name string
+		args args
+		want *[]networkmgmt.PrivateLinkServiceConnection
+	}{
+		{
+			name: "SuccessfulNotSet",
+			args: args{
+				p: []v1beta1.PrivateLinkServiceConnection{},
+			},
+			want: &[]networkmgmt.PrivateLinkServiceConnection{},
+		},
+		{
+			name: "SuccessfulSet",
+			args: args{
+				p: []v1beta1.PrivateLinkServiceConnection{
+					{
+						PrivateConnectionResourceID: addressPrefix,
+					},
+				},
+			},
+			want: &[]networkmgmt.PrivateLinkServiceConnection{
+				{
+					PrivateLinkServiceConnectionProperties: &networkmgmt.PrivateLinkServiceConnectionProperties{
+						PrivateLinkServiceID: &addressPrefix,
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewprivateLinkServiceConnections(tt.args.p); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewprivateLinkServiceConnections() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewPrivateEndpointParameters(t *testing.T) {
+	type args struct {
+		v *v1beta1.PrivateEndpoint
+	}
+	tests := []struct {
+		name string
+		args args
+		want networkmgmt.PrivateEndpoint
+	}{
+		{
+			name: "Successful",
+			args: args{
+				v: &v1beta1.PrivateEndpoint{
+					ObjectMeta: metav1.ObjectMeta{UID: uid},
+					Spec: v1beta1.PrivateEndpointSpec{
+						Location: location,
+						PrivateEndpointParameters: v1beta1.PrivateEndpointParameters{
+							PrivateLinkServiceConnections: []v1beta1.PrivateLinkServiceConnection{
+								privateLinkConn,
+							},
+						},
+					},
+				},
+			},
+			want: networkmgmt.PrivateEndpoint{
+				Location: azure.ToStringPtr(location),
+				Tags:     azure.ToStringPtrMap(nil),
+				PrivateEndpointProperties: &networkmgmt.PrivateEndpointProperties{
+					Subnet:                              &networkmgmt.Subnet{},
+					PrivateLinkServiceConnections:       NewprivateLinkServiceConnections([]v1beta1.PrivateLinkServiceConnection{privateLinkConn}),
+					ManualPrivateLinkServiceConnections: NewprivateLinkServiceConnections(nil),
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewPrivateEndpointParameters(tt.args.v)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("NewPrivateEndpointParameters(...): -want, +got\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestPrivateEndpointNeedsUpdate(t *testing.T) {
+	type args struct {
+		kube *v1beta1.PrivateEndpoint
+		az   networkmgmt.PrivateEndpoint
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "NoUpdate",
+			args: args{
+				kube: &v1beta1.PrivateEndpoint{
+					Spec: v1beta1.PrivateEndpointSpec{
+						PrivateEndpointParameters: v1beta1.PrivateEndpointParameters{
+							VirtualNetworkSubnetID:        id,
+							PrivateLinkServiceConnections: []v1beta1.PrivateLinkServiceConnection{privateLinkConn},
+						},
+					},
+				},
+				az: networkmgmt.PrivateEndpoint{
+					PrivateEndpointProperties: &networkmgmt.PrivateEndpointProperties{
+						Subnet: &networkmgmt.Subnet{
+							ID: azure.ToStringPtr(id),
+						},
+						PrivateLinkServiceConnections:       NewprivateLinkServiceConnections([]v1beta1.PrivateLinkServiceConnection{privateLinkConn}),
+						ManualPrivateLinkServiceConnections: &[]networkmgmt.PrivateLinkServiceConnection{},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "Need update",
+			args: args{
+				kube: &v1beta1.PrivateEndpoint{
+					Spec: v1beta1.PrivateEndpointSpec{
+						PrivateEndpointParameters: v1beta1.PrivateEndpointParameters{
+							VirtualNetworkSubnetID:        "foo",
+							PrivateLinkServiceConnections: []v1beta1.PrivateLinkServiceConnection{privateLinkConn},
+						},
+					},
+				},
+				az: networkmgmt.PrivateEndpoint{
+					PrivateEndpointProperties: &networkmgmt.PrivateEndpointProperties{
+						Subnet: &networkmgmt.Subnet{
+							ID: azure.ToStringPtr(id),
+						},
+						PrivateLinkServiceConnections:       NewprivateLinkServiceConnections([]v1beta1.PrivateLinkServiceConnection{privateLinkConn}),
+						ManualPrivateLinkServiceConnections: &[]networkmgmt.PrivateLinkServiceConnection{},
+					},
+				},
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := PrivateEndpointNeedsUpdate(tt.args.kube, tt.args.az)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("PrivateEndpointNeedsUpdate(...): -want, +got\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestUpdatePrivateEndpointStatusFromAzure(t *testing.T) {
+	mockCondition := xpv1.Condition{Message: "mockMessage"}
+	resourceStatus := xpv1.ResourceStatus{
+		ConditionedStatus: xpv1.ConditionedStatus{
+			Conditions: []xpv1.Condition{mockCondition},
+		},
+	}
+
+	tests := []struct {
+		name string
+		az   networkmgmt.PrivateEndpoint
+		want v1beta1.PrivateEndpointStatus
+	}{
+		{
+			name: "Full",
+			az: networkmgmt.PrivateEndpoint{
+				ID:   azure.ToStringPtr(id),
+				Etag: azure.ToStringPtr(etag),
+				Type: azure.ToStringPtr(resourceType),
+				PrivateEndpointProperties: &networkmgmt.PrivateEndpointProperties{
+					NetworkInterfaces: &[]networkmgmt.Interface{
+						{
+							ID: azure.ToStringPtr(id),
+						},
+					},
+					ProvisioningState: networkmgmt.ProvisioningState("Succeeded"),
+				},
+			},
+			want: v1beta1.PrivateEndpointStatus{
+				ID:                  id,
+				Etag:                etag,
+				Type:                resourceType,
+				State:               string(networkmgmt.Succeeded),
+				NetworkInterfacesID: []string{id},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := &v1beta1.PrivateEndpoint{
+				Status: v1beta1.PrivateEndpointStatus{
+					ResourceStatus: resourceStatus,
+				},
+			}
+
+			UpdatePrivateEndpointStatusFromAzure(v, tt.az)
+			// make sure that internal resource status hasn't changed
+			if diff := cmp.Diff(mockCondition, v.Status.ResourceStatus.Conditions[0]); diff != "" {
+				t.Errorf("UpdateSubnetStatusFromAzure(...): -want, +got\n%s", diff)
+			}
+
+			// make sure that other resource parameters are updated
+			tt.want.ResourceStatus = resourceStatus
+			if diff := cmp.Diff(tt.want, v.Status); diff != "" {
 				t.Errorf("UpdateSubnetStatusFromAzure(...): -want, +got\n%s", diff)
 			}
 		})
