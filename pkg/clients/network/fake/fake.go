@@ -86,3 +86,35 @@ func (c *MockSubnetsClient) Get(ctx context.Context, resourceGroupName string, v
 func (c *MockSubnetsClient) List(ctx context.Context, resourceGroupName string, virtualNetworkName string) (result network.SubnetListResultPage, err error) {
 	return c.MockList(ctx, resourceGroupName, virtualNetworkName)
 }
+
+var _ networkapi.PrivateEndpointsClientAPI = &MockPrivateEndpointsClient{}
+
+// MockPrivateEndpointsClient is a fake implementation of network.SubnetsClient.
+type MockPrivateEndpointsClient struct {
+	networkapi.PrivateEndpointsClientAPI
+
+	MockCreateOrUpdate func(ctx context.Context, resourceGroupName string, privateEndpointName string, privateEndpointParameters network.PrivateEndpoint) (result network.PrivateEndpointsCreateOrUpdateFuture, err error)
+	MockDelete         func(ctx context.Context, resourceGroupName string, privateEndpointNamesubnetName string) (result network.PrivateEndpointsDeleteFuture, err error)
+	MockGet            func(ctx context.Context, resourceGroupName string, privateEndpointName string, expand string) (result network.PrivateEndpoint, err error)
+	MockList           func(ctx context.Context, resourceGroupName string) (result network.PrivateEndpointListResultPage, err error)
+}
+
+// CreateOrUpdate calls the MockSubnetsClient's MockCreateOrUpdate method.
+func (c *MockPrivateEndpointsClient) CreateOrUpdate(ctx context.Context, resourceGroupName string, privateEndpointName string, privateEndpointParameters network.PrivateEndpoint) (result network.PrivateEndpointsCreateOrUpdateFuture, err error) {
+	return c.MockCreateOrUpdate(ctx, resourceGroupName, privateEndpointName, privateEndpointParameters)
+}
+
+// Delete calls the MockSubnetsClient's MockDelete method.
+func (c *MockPrivateEndpointsClient) Delete(ctx context.Context, resourceGroupName string, privateEndpointName string) (result network.PrivateEndpointsDeleteFuture, err error) {
+	return c.MockDelete(ctx, resourceGroupName, privateEndpointName)
+}
+
+// Get calls the MockSubnetsClient's MockGet method.
+func (c *MockPrivateEndpointsClient) Get(ctx context.Context, resourceGroupName string, privateEndpointName string, expand string) (result network.PrivateEndpoint, err error) {
+	return c.MockGet(ctx, resourceGroupName, privateEndpointName, expand)
+}
+
+// List calls the MockSubnetsClient's MockListKeys method.
+func (c *MockPrivateEndpointsClient) List(ctx context.Context, resourceGroupName string) (result network.PrivateEndpointListResultPage, err error) {
+	return c.MockList(ctx, resourceGroupName)
+}
