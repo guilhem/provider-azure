@@ -37,7 +37,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: A PrivateEndpoint is a managed resource that represents an Azure Virtual Network.
+        description: A PrivateEndpoint is a managed resource that represents an Azure Private Endpoint
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -48,7 +48,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: A PrivateEndpointSpec defines the desired state of a VirtualNetwork.
+            description: A PrivateEndpointSpec - defines the desired state of a PrivateEndpoint.
             properties:
               deletionPolicy:
                 description: DeletionPolicy specifies what will happen to the underlying external when this managed resource is deleted - either "Delete" or "Orphan" the external resource. The "Delete" policy is the default when no policy is specified.
@@ -62,7 +62,7 @@ spec:
               manualPrivateLinkServiceConnections:
                 description: ManualPrivateLinkServiceConnections
                 items:
-                  description: PrivateLinkServiceConnection ldlldelde
+                  description: PrivateLinkServiceConnection - defines properties of a Private Link Service Connection
                   properties:
                     name:
                       description: Name - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
@@ -83,7 +83,7 @@ spec:
               privateLinkServiceConnections:
                 description: PrivateLinkServiceConnections
                 items:
-                  description: PrivateLinkServiceConnection ldlldelde
+                  description: PrivateLinkServiceConnection - defines properties of a Private Link Service Connection
                   properties:
                     name:
                       description: Name - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
@@ -120,10 +120,10 @@ spec:
                 - name
                 type: object
               resourceGroupName:
-                description: ResourceGroupName - Name of the Virtual Network's resource group.
+                description: ResourceGroupName - Name of the PrivateEndpoint's resource group.
                 type: string
               resourceGroupNameRef:
-                description: ResourceGroupNameRef - A reference to the the Virtual Network's resource group.
+                description: ResourceGroupNameRef - A reference to the the PrivateEndpoint's resource group.
                 properties:
                   name:
                     description: Name of the referenced object.
@@ -132,7 +132,7 @@ spec:
                 - name
                 type: object
               resourceGroupNameSelector:
-                description: ResourceGroupNameSelector - Select a reference to the the Virtual Network's resource group.
+                description: ResourceGroupNameSelector - Select a reference to the PrivateEndpoint's resource group.
                 properties:
                   matchControllerRef:
                     description: MatchControllerRef ensures an object with the same controller reference as the selecting object is selected.
@@ -191,7 +191,7 @@ spec:
             - privateLinkServiceConnections
             type: object
           status:
-            description: A PrivateEndpointStatus represents the observed state of a VirtualNetwork.
+            description: A PrivateEndpointStatus represents the observed state of the PrivateEndpoint
             properties:
               conditions:
                 description: Conditions of the resource.
