@@ -41,7 +41,7 @@ var (
 	addressPrefix        = "10.0.0.0/16"
 	serviceEndpoint      = "Microsoft.Sql"
 	tags                 = map[string]string{"one": "test", "two": "test"}
-	privateLinkConn      = v1beta1.PrivateLinkServiceConnection{Name: "myPrivateLink", PrivateConnectionResourceID: "coolid", SubresourceID: []string{"sub"}}
+	privateLinkConn      = v1beta1.PrivateLinkServiceConnection{Name: "myPrivateLink", PrivateConnectionResourceID: "coolid", SubresourceIDs: []string{"sub"}}
 
 	id           = "a-very-cool-id"
 	etag         = "a-very-cool-etag"

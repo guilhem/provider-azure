@@ -70,15 +70,15 @@ spec:
                     privateConnectionResourceID:
                       description: PrivateConnectionResourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
                       type: string
-                    subresourceID:
-                      description: SubresourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                    subresourceIDs:
+                      description: SubresourceIDs - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
                       items:
                         type: string
                       type: array
                   required:
                   - name
                   - privateConnectionResourceID
-                  - subresourceID
+                  - subresourceIDs
                   type: object
                 type: array
               privateLinkServiceConnections:
@@ -92,15 +92,15 @@ spec:
                     privateConnectionResourceID:
                       description: PrivateConnectionResourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
                       type: string
-                    subresourceID:
-                      description: SubresourceID - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
+                    subresourceIDs:
+                      description: SubresourceIDs - The AddressSpace that contains an array of IP address ranges that can be used by subnets.
                       items:
                         type: string
                       type: array
                   required:
                   - name
                   - privateConnectionResourceID
-                  - subresourceID
+                  - subresourceIDs
                   type: object
                 type: array
               providerConfigRef:

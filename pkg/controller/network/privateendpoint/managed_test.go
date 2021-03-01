@@ -88,7 +88,7 @@ func privateendpoint(sm ...privateEndpointModifier) *v1beta1.PrivateEndpoint {
 					{
 						Name:                        privateLinkName,
 						PrivateConnectionResourceID: privateLinkID,
-						SubresourceID:               []string{},
+						SubresourceIDs:              []string{},
 					},
 				},
 				ManualPrivateLinkServiceConnections: []v1beta1.PrivateLinkServiceConnection{},

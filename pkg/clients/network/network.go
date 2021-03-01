@@ -118,7 +118,7 @@ func NewprivateLinkServiceConnections(p []v1beta1.PrivateLinkServiceConnection) 
 			Name: azure.ToStringPtr(conn.Name),
 			PrivateLinkServiceConnectionProperties: &networkmgmt.PrivateLinkServiceConnectionProperties{
 				PrivateLinkServiceID: azure.ToStringPtr(conn.PrivateConnectionResourceID),
-				GroupIds:             azure.ToStringArrayPtr(conn.SubresourceID),
+				GroupIds:             azure.ToStringArrayPtr(conn.SubresourceIDs),
 			},
 		}
 	}

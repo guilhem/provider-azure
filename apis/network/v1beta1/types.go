@@ -32,9 +32,9 @@ type PrivateLinkServiceConnection struct {
 	// ranges that can be used by subnets.
 	PrivateConnectionResourceID string `json:"privateConnectionResourceID"`
 
-	// SubresourceID - The AddressSpace that contains an array of IP address
+	// SubresourceIDs - The AddressSpace that contains an array of IP address
 	// ranges that can be used by subnets.
-	SubresourceID []string `json:"subresourceID"`
+	SubresourceIDs []string `json:"subresourceIDs"`
 }
 
 // PrivateEndpointParameters - defines properties of a PrivateEndpoint.
