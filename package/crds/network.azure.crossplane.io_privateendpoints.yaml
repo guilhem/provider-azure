@@ -78,6 +78,7 @@ spec:
                   required:
                   - name
                   - privateConnectionResourceID
+                  - subresourceID
                   type: object
                 type: array
               privateLinkServiceConnections:
@@ -99,6 +100,7 @@ spec:
                   required:
                   - name
                   - privateConnectionResourceID
+                  - subresourceID
                   type: object
                 type: array
               providerConfigRef:
@@ -187,8 +189,6 @@ spec:
                 type: object
             required:
             - location
-            - manualPrivateLinkServiceConnections
-            - privateLinkServiceConnections
             type: object
           status:
             description: A PrivateEndpointStatus represents the observed state of the PrivateEndpoint

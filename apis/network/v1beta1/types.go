@@ -34,8 +34,7 @@ type PrivateLinkServiceConnection struct {
 
 	// SubresourceID - The AddressSpace that contains an array of IP address
 	// ranges that can be used by subnets.
-	// +optional
-	SubresourceID []string `json:"subresourceID,omitempty"`
+	SubresourceID []string `json:"subresourceID"`
 }
 
 // PrivateEndpointParameters - defines properties of a PrivateEndpoint.
@@ -51,10 +50,10 @@ type PrivateEndpointParameters struct {
 	VirtualNetworkSubnetIDSelector *xpv1.Selector `json:"virtualNetworkSubnetIdSelector,omitempty"`
 
 	// PrivateLinkServiceConnections
-	PrivateLinkServiceConnections []PrivateLinkServiceConnection `json:"privateLinkServiceConnections"`
+	PrivateLinkServiceConnections []PrivateLinkServiceConnection `json:"privateLinkServiceConnections,omitempty"`
 
 	// ManualPrivateLinkServiceConnections
-	ManualPrivateLinkServiceConnections []PrivateLinkServiceConnection `json:"manualPrivateLinkServiceConnections"`
+	ManualPrivateLinkServiceConnections []PrivateLinkServiceConnection `json:"manualPrivateLinkServiceConnections,omitempty"`
 }
 
 // A PrivateEndpointSpec - defines the desired state of a PrivateEndpoint.

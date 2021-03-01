@@ -41,9 +41,9 @@ import (
 )
 
 const (
-	name              = "coolSubnet"
-	uid               = types.UID("definitely-a-uuid")
-	addressPrefix     = "10.0.0.0/16"
+	name = "coolSubnet"
+	uid  = types.UID("definitely-a-uuid")
+	// addressPrefix     = "10.0.0.0/16"
 	vnetID            = "coolVnet"
 	privateLinkName   = "coolPrivateLink"
 	privateLinkID     = "coolPrivateLink-uuid"
