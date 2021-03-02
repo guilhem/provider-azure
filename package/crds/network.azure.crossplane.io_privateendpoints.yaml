@@ -227,6 +227,9 @@ spec:
               id:
                 description: ID of this PrivateEndpoint.
                 type: string
+              ip:
+                description: IP is the private ip address
+                type: string
               message:
                 description: A Message providing detail about the state of this PrivateEndpoint, if any.
                 type: string

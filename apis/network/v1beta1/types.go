@@ -95,6 +95,9 @@ type PrivateEndpointStatus struct {
 	// NetworkInterfacesID
 	NetworkInterfacesID []string `json:"networkInterfaces,omitempty"`
 
+	// IP is the private ip address
+	IP string `json:"ip,omitempty"`
+
 	// ID of this PrivateEndpoint.
 	ID string `json:"id,omitempty"`
 

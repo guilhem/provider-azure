@@ -163,6 +163,11 @@ func UpdatePrivateEndpointStatusFromAzure(v *v1beta1.PrivateEndpoint, az network
 	networkInterfaces := make([]string, len(*az.NetworkInterfaces))
 	for i, n := range *az.NetworkInterfaces {
 		networkInterfaces[i] = azure.ToString(n.ID)
+		if n.IPConfigurations != nil {
+			for _, ip := range *n.IPConfigurations {
+				v.Status.IP = azure.ToString(ip.PrivateIPAddress)
+			}
+		}
 	}
 
 	v.Status.State = string(az.ProvisioningState)
