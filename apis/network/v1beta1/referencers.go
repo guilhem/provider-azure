@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	databasev1beta1 "github.com/crossplane/provider-azure/apis/database/v1beta1"
 	netv1alpha3 "github.com/crossplane/provider-azure/apis/network/v1alpha3"
 	"github.com/crossplane/provider-azure/apis/v1alpha3"
 )
@@ -58,6 +59,22 @@ func (mg *PrivateEndpoint) ResolveReferences(ctx context.Context, c client.Reade
 	}
 	mg.Spec.VirtualNetworkSubnetID = rsp.ResolvedValue
 	mg.Spec.VirtualNetworkSubnetIDRef = rsp.ResolvedReference
+
+	for i, pl := range mg.Spec.PrivateLinkServiceConnections {
+		// Resolve spec.virtualNetworkSubnetId
+		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			CurrentValue: pl.PrivateConnectionResourceID,
+			Reference:    pl.PrivateConnectionResourceIDRef,
+			Selector:     pl.PrivateConnectionResourceIDSelector,
+			To:           reference.To{Managed: &databasev1beta1.MySQLServer{}, List: &databasev1beta1.MySQLServerList{}},
+			Extract:      databasev1beta1.MySQLServerID(),
+		})
+		if err != nil {
+			return errors.Wrap(err, "spec.PrivateLinkServiceConnections[].PrivateConnectionResourceID")
+		}
+		mg.Spec.PrivateLinkServiceConnections[i].PrivateConnectionResourceID = rsp.ResolvedValue
+		mg.Spec.PrivateLinkServiceConnections[i].PrivateConnectionResourceIDRef = rsp.ResolvedReference
+	}
 
 	return nil
 }

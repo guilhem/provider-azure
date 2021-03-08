@@ -32,6 +32,13 @@ type PrivateLinkServiceConnection struct {
 	// ranges that can be used by subnets.
 	PrivateConnectionResourceID string `json:"privateConnectionResourceID"`
 
+	// PrivateConnectionResourceIDRef - A reference to the the PrivateEndpoint's resource
+	// group.
+	PrivateConnectionResourceIDRef *xpv1.Reference `json:"privateConnectionResourceIDRef,omitempty"`
+
+	// PrivateConnectionResourceIDSelector - Select a reference to the PrivateEndpoint's resource group.
+	PrivateConnectionResourceIDSelector *xpv1.Selector `json:"privateConnectionResourceIDSelector,omitempty"`
+
 	// SubresourceIDs - The AddressSpace that contains an array of IP address
 	// ranges that can be used by subnets.
 	SubresourceIDs []string `json:"subresourceIDs"`

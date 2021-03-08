@@ -23,9 +23,21 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane/crossplane-runtime/pkg/reference"
+	resource "github.com/crossplane/crossplane-runtime/pkg/resource"
 
 	"github.com/crossplane/provider-azure/apis/v1alpha3"
 )
+
+// MySQLServerID lol
+func MySQLServerID() reference.ExtractValueFn {
+	return func(mg resource.Managed) string {
+		s, ok := mg.(*MySQLServer)
+		if !ok {
+			return ""
+		}
+		return s.Status.AtProvider.ID
+	}
+}
 
 // ResolveReferences of this MySQLServer.
 func (mg *MySQLServer) ResolveReferences(ctx context.Context, c client.Reader) error {
